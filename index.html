@@ -2,295 +2,292 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DINNER NIGHT // Planer</title>
-    
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LKW Mobile Terminal</title>
     <style>
-        /* --- NEOFIT STYLE DEFINITIONEN --- */
         :root {
-            --bg-dark: #0a0a12;
-            --card-bg: rgba(20, 20, 35, 0.8);
-            --neon-pink: #ff00ff;
-            --neon-cyan: #00ffff;
-            --neon-purple: #9d00ff;
-            --text-light: #e0e0ff;
+            --hanomag-red: #c40d1e;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --success: #10b981;
+            --info: #3b82f6;
         }
-
         body {
-            font-family: 'Montserrat', 'Segoe UI', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 50% 20%, rgba(157, 0, 255, 0.1) 0%, rgba(10, 10, 18, 1) 70%);
-            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
             margin: 0;
-            padding: 20px;
-            min-height: 100vh;
+            padding: 10px;
         }
 
-        h1 {
+        /* LOGIN OVERLAY */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #1a1a1a; z-index: 10000; display: flex; 
+            align-items: center; justify-content: center;
+        }
+        .login-box {
+            background: white; padding: 25px; border-radius: 12px; width: 85%; max-width: 300px; 
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .login-input {
+            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; 
+            border-radius: 6px; box-sizing: border-box; font-size: 16px;
+        }
+        .login-btn {
+            width: 100%; padding: 12px; background: var(--hanomag-red); color: white; 
+            border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;
+        }
+
+        header {
+            background: white;
+            padding: 10px;
+            border-bottom: 3px solid var(--hanomag-red);
+            margin: -10px -10px 15px -10px;
             text-align: center;
-            font-weight: 300;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #fff;
-            text-shadow: 
-                0 0 5px #fff,
-                0 0 20px var(--neon-pink),
-                0 0 40px var(--neon-cyan);
-            margin-bottom: 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 1.1rem; text-transform: uppercase; }
+        
+        h2 { 
+            font-size: 0.9rem; 
+            color: #4a4a4a; 
+            text-transform: uppercase; 
+            margin: 20px 5px 10px 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
-
-        /* KARTEN */
-        .card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-        }
-        .card-pink-glow {
-             box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
-             border: 1px solid rgba(255, 0, 255, 0.2);
-        }
-
-        h2 {
-            margin-top: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 15px;
-            font-weight: 300;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 8px var(--neon-cyan);
-        }
-        .pink-title h2 { color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); }
-
-        /* INPUTS & BUTTONS */
-        input {
-            width: 100%;
+        .truck-card {
+            background: var(--card);
+            border-radius: 10px;
             padding: 12px;
-            margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #fff;
-            box-sizing: border-box;
-        }
-        input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
-
-        button.main-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-            transition: transform 0.2s;
-        }
-        button.main-btn:hover { transform: translateY(-2px); }
-        button.main-btn.pink-btn { background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple)); box-shadow: 0 0 20px rgba(255, 0, 255, 0.4); }
-
-        /* LISTEN */
-        ul { list-style: none; padding: 0; }
-        li {
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            border-left: 3px solid var(--neon-cyan);
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        li span.who { font-weight: bold; color: var(--neon-cyan); margin-right: 10px;}
         
-        .delete-btn {
-            background: transparent; border: 1px solid rgba(255, 50, 50, 0.5); color: rgba(255, 50, 50, 0.8);
-            cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;
-        }
-        .delete-btn:hover { background: rgba(255, 0, 0, 0.2); color: #ff3333; }
+        .ist-card { border-left: 5px solid var(--hanomag-red); }
+        .plan-card { border-left: 5px solid var(--info); }
 
-        /* CHAT */
-        #chat-window {
-            height: 350px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 15px; padding: 15px; background-color: rgba(0,0,0,0.2); border-radius: 8px;
+        .info { flex: 1; }
+        .spedition { font-weight: bold; font-size: 1rem; display: block; }
+        .details { font-size: 0.8rem; color: #666; margin-top: 2px; }
+        
+        .btn {
+            color: white;
+            border: none;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
-        .message {
-            margin-bottom: 10px; padding: 8px; border-radius: 6px;
-            background: rgba(255, 0, 255, 0.05); border-left: 2px solid var(--neon-pink); font-size: 0.9em;
-            display: flex; justify-content: space-between;
+        
+        .btn-checkout { background: var(--success); }
+        .btn-checkin { background: var(--info); }
+        
+        .btn:active { opacity: 0.8; transform: scale(0.95); }
+
+        .empty-msg {
+            text-align: center;
+            color: #999;
+            font-size: 0.8rem;
+            padding: 10px;
         }
-        .message-content { flex-grow: 1; margin-right: 10px;}
-        .message strong { color: var(--neon-pink); }
+        
+        .badge-in { color: #065f46; font-weight: bold; }
+        .badge-out { color: #92400e; font-weight: bold; }
+        .time-badge { background: #eee; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>⭕ DINNER PARTY ⭕</h1>
-
-    <div class="container">
-        <div class="card">
-            <h2>// FOOD & DRINKS</h2>
-            <div id="food-form">
-                <input type="text" id="food-name" placeholder="Code Name (Dein Name)">
-                <input type="text" id="food-item" placeholder="(Was bringst du? Trüffel , Prosecco)">
-                <button class="main-btn" onclick="addFood()">ITEM EINTRAGEN & SENDEN</button>
-            </div>
-            <ul id="food-list"></ul>
-        </div>
-
-        <div class="card card-pink-glow pink-title">
-            <h2>// LIVE COMMS KANAL</h2>
-            <div id="chat-window"></div>
-            <input type="text" id="chat-name" placeholder="Alias ID (Dein Name)">
-            <input type="text" id="chat-message" placeholder="Nachricht übermitteln..." onkeypress="handleEnter(event)">
-            <button class="main-btn pink-btn" onclick="sendMessage()">SENDEN</button>
-        </div>
+<div id="login-overlay">
+    <div class="login-box">
+        <h2 style="margin-top:0; color:#333;">Mobil Login</h2>
+        <input type="text" id="login-user" value="Logistik" class="login-input" readonly>
+        <input type="password" id="login-pass" placeholder="Passwort" class="login-input" autofocus>
+        <button onclick="handleLogin()" class="login-btn">Anmelden</button>
+        <p id="login-error" style="color:red; font-size:12px; margin-top:10px; display:none;">Passwort falsch!</p>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, remove, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<header>
+    <h1>Logistik Terminal Mobil</h1>
+</header>
 
-        // ==========================================
-        // 1. FIREBASE CONFIG (HIER DEINE DATEN)
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "HIER_API_KEY_EINFÜGEN",
-            authDomain: "DEIN_PROJEKT.firebaseapp.com",
-            databaseURL: "https://DEIN_PROJEKT-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "DEIN_PROJEKT",
-            storageBucket: "DEIN_PROJEKT.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
+<main id="main-content" style="display:none;">
+    <h2>🔴 Im Werk (Abmelden)</h2>
+    <div id="ist-list"></div>
 
-        // ==========================================
-        // 2. EMAIL CONFIG (HIER DEINE NEUEN DATEN)
-        // ==========================================
-        const EMAILJS_PUBLIC_KEY = "HIER_PUBLIC_KEY_EINFÜGEN"; // z.B. "user_AbCdEfGh..."
-        const EMAILJS_SERVICE_ID = "HIER_SERVICE_ID_EINFÜGEN"; // z.B. "service_gmail"
-        const EMAILJS_TEMPLATE_ID = "HIER_TEMPLATE_ID_EINFÜGEN"; // z.B. "template_dinner"
+    <hr style="border: 0; border-top: 1px solid #ccc; margin: 25px 0;">
 
-        // Initialisierung
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const foodRef = ref(db, 'food_neofit');
-        const chatRef = ref(db, 'chat_neofit');
+    <h2>🔵 Heute geplant (Einchecken)</h2>
+    <div id="plan-list"></div>
+    
+    <button onclick="logout()" style="width:100%; margin-top:30px; padding:10px; background:#4a4a4a; color:white; border:none; border-radius:6px;">Abmelden</button>
+</main>
 
-        // EmailJS starten
-        (function(){
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-        })();
-
-        // --- ESSEN EINTRAGEN + EMAIL SENDEN ---
-        window.addFood = function() {
-            const name = document.getElementById('food-name').value;
-            const item = document.getElementById('food-item').value;
-
-            if(name && item) {
-                // 1. In Datenbank speichern
-                push(foodRef, { name: name, item: item });
-
-                // 2. Email senden
-                const btn = document.querySelector('button.main-btn');
-                const oldText = btn.innerText;
-                btn.innerText = "Sende Info..."; // Feedback für User
-                
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    name: name,
-                    item: item,
-                    to_email: "alex_kellner@me.com" 
-                }).then(function() {
-                    console.log("Email gesendet!");
-                    btn.innerText = oldText;
-                }, function(error) {
-                    console.log("Email Fehler:", error);
-                    btn.innerText = oldText; // Trotzdem zurücksetzen
-                });
-
-                document.getElementById('food-item').value = '';
-            } else {
-                alert("FEHLER: Name und Supply Drop erforderlich.");
-            }
+<script>
+    function handleLogin() {
+        const pass = document.getElementById('login-pass').value;
+        if(pass === "2013!") {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            sessionStorage.setItem('mobileLoggedIn', 'true');
+        } else {
+            document.getElementById('login-error').style.display = 'block';
         }
+    }
 
-        // --- CHAT ---
-        window.sendMessage = function() {
-            const name = document.getElementById('chat-name').value;
-            const msg = document.getElementById('chat-message').value;
-            if(name && msg) {
-                push(chatRef, { name: name, message: msg, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-                document.getElementById('chat-message').value = '';
-                localStorage.setItem('chatName', name); 
-            }
+    function logout() {
+        sessionStorage.removeItem('mobileLoggedIn');
+        location.reload();
+    }
+
+    window.onload = function() {
+        if(sessionStorage.getItem('mobileLoggedIn') === 'true') {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
         }
+    }
+</script>
 
-        window.handleEnter = function(e) {
-            if(e.key === 'Enter') window.sendMessage();
-        }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- LÖSCHEN ---
-        window.deleteItem = function(type, key) {
-            if(confirm("Eintrag wirklich löschen?")) {
-                const itemRef = ref(db, type + '_neofit/' + key);
-                remove(itemRef);
-            }
-        }
+    const firebaseConfig = {
+        apiKey: "AIzaSyDJBsp7utlNUw4wgHsQOyznV7ioaqY76OQ",
+        authDomain: "lkw-trackerneu.firebaseapp.com",
+        projectId: "lkw-trackerneu",
+        databaseURL: "https://lkw-trackerneu-default-rtdb.europe-west1.firebasedatabase.app",
+        storageBucket: "lkw-trackerneu.firebasestorage.app",
+        appId: "1:335563014230:web:284080c578f89595993bf7"
+    };
 
-        // --- NAMEN LADEN ---
-        if(localStorage.getItem('chatName')) {
-            document.getElementById('chat-name').value = localStorage.getItem('chatName');
-            document.getElementById('food-name').value = localStorage.getItem('chatName');
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // --- LISTENERS (Live Updates) ---
-        onChildAdded(foodRef, (snapshot) => {
-            const data = snapshot.val();
-            const key = snapshot.key;
-            const list = document.getElementById('food-list');
-            const li = document.createElement('li');
-            li.id = key;
-            li.innerHTML = `<div><span class="who">${data.name}</span> <span>${data.item}</span></div>
-                            <button class="delete-btn" onclick="deleteItem('food', '${key}')">&times;</button>`;
-            list.appendChild(li);
+    const istListDiv = document.getElementById('ist-list');
+    const planListDiv = document.getElementById('plan-list');
+
+    onSnapshot(collection(db, "logs"), (snapshot) => {
+        const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderIstList(logs);
+    });
+
+    onSnapshot(collection(db, "plans"), (snapshot) => {
+        const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderPlanList(plans);
+    });
+
+    function renderIstList(logs) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const active = logs.filter(l => l.date === todayStr && !l.departureTime)
+                           .sort((a, b) => b.time.localeCompare(a.time));
+
+        istListDiv.innerHTML = active.length === 0 ? '<div class="empty-msg">Keine LKW im Werk</div>' : '';
+
+        active.forEach(truck => {
+            const card = document.createElement('div');
+            card.className = 'truck-card ist-card';
+            const typeLabel = truck.type === 'Anlieferung' ? '<span class="badge-in">IN</span>' : '<span class="badge-out">OUT</span>';
+
+            card.innerHTML = `
+                <div class="info">
+                    <span class="spedition">${truck.spedition}</span>
+                    <div class="details">
+                        <span class="time-badge">${truck.time}</span> | ${typeLabel} | <b>${truck.plate || '?'}</b>
+                    </div>
+                </div>
+                <button class="btn btn-checkout" onclick="mobileCheckout('${truck.id}', '${truck.time}', '${truck.spedition}')">Abmelden</button>
+            `;
+            istListDiv.appendChild(card);
         });
+    }
 
-        onChildAdded(chatRef, (snapshot) => {
-            const data = snapshot.val();
-            const key = snapshot.key;
-            const chatWin = document.getElementById('chat-window');
-            const div = document.createElement('div');
-            div.className = "message";
-            div.id = key;
-            div.innerHTML = `<div class="message-content"><strong>[${data.time}] ${data.name}:</strong> ${data.message}</div>
-                             <button class="delete-btn" onclick="deleteItem('chat', '${key}')">&times;</button>`;
-            chatWin.appendChild(div);
-            chatWin.scrollTop = chatWin.scrollHeight;
-        });
+    function renderPlanList(plans) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayPlans = plans.filter(p => p.date === todayStr)
+                                .sort((a, b) => a.time.localeCompare(b.time));
 
-        onChildRemoved(foodRef, (snapshot) => {
-            const el = document.getElementById(snapshot.key);
-            if(el) el.remove();
-        });
+        planListDiv.innerHTML = todayPlans.length === 0 ? '<div class="empty-msg">Keine Planungen für heute</div>' : '';
 
-        onChildRemoved(chatRef, (snapshot) => {
-            const el = document.getElementById(snapshot.key);
-            if(el) el.remove();
+        todayPlans.forEach(plan => {
+            const card = document.createElement('div');
+            card.className = 'truck-card plan-card';
+            const typeLabel = plan.type === 'Anlieferung' ? '<span class="badge-in">IN</span>' : '<span class="badge-out">OUT</span>';
+
+            card.innerHTML = `
+                <div class="info">
+                    <span class="spedition">${plan.spedition}</span>
+                    <div class="details">
+                        Plan: <span class="time-badge">${plan.time}</span> | ${typeLabel}
+                    </div>
+                </div>
+                <button class="btn btn-checkin" onclick="mobileCheckin('${plan.id}')">Ankunft</button>
+            `;
+            planListDiv.appendChild(card);
         });
-    </script>
+    }
+
+    window.mobileCheckout = async (id, startTime, spedition) => {
+        const nowTime = new Date().toTimeString().substring(0,5);
+        const userTime = prompt(`Abfahrt für ${spedition}:\nWann ist er gefahren?`, nowTime);
+        if (!userTime) return;
+
+        const duration = calculateDuration(startTime, userTime);
+        try {
+            await updateDoc(doc(db, "logs", id), { departureTime: userTime, duration: duration });
+        } catch (e) { alert("Fehler!"); }
+    };
+
+    window.mobileCheckin = async (id) => {
+        if(!confirm("LKW jetzt als 'Ist da' erfassen?")) return;
+        
+        onSnapshot(doc(db, "plans", id), async (docSnap) => {
+            if (!docSnap.exists()) return;
+            const p = docSnap.data();
+            const now = new Date();
+            const curTime = now.toTimeString().substring(0,5);
+            
+            const logEntry = {
+                spedition: p.spedition, plate: p.plate || '?', ware: p.ware,
+                type: p.type, date: now.toISOString().split('T')[0],
+                time: curTime, shift: calculateShift(curTime),
+                departureTime: null, duration: null, fromPlanId: id
+            };
+
+            try {
+                await addDoc(collection(db, "logs"), logEntry);
+                await deleteDoc(doc(db, "plans", id));
+            } catch (e) { console.error(e); }
+        }, { once: true });
+    };
+
+    function calculateDuration(start, end) {
+        const [h1, m1] = start.split(':').map(Number), [h2, m2] = end.split(':').map(Number);
+        let diff = (h2*60+m2) - (h1*60+m1);
+        if(diff < 0) diff += 1440;
+        const h = Math.floor(diff/60), m = diff%60;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function calculateShift(timeStr) {
+        const h = parseInt(timeStr.split(':')[0]);
+        if(h>=6 && h<14) return "Früh";
+        if(h>=14 && h<22) return "Spät";
+        return "Nacht";
+    }
+</script>
+
 </body>
 </html>
