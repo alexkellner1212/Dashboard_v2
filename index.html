@@ -11,6 +11,7 @@
             --card: #ffffff;
             --success: #10b981;
             --info: #3b82f6;
+            --dark: #1a1a1a;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -55,11 +56,38 @@
             font-size: 0.9rem; 
             color: #4a4a4a; 
             text-transform: uppercase; 
-            margin: 20px 5px 10px 5px;
+            margin: 25px 5px 10px 5px;
             display: flex;
             align-items: center;
             gap: 8px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
         }
+
+        /* SCHNELLERFASSUNG */
+        .quick-form {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .btn-small-opt {
+            background: #eee;
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .btn-small-opt:active { background: #ddd; }
 
         .truck-card {
             background: var(--card);
@@ -92,6 +120,7 @@
         
         .btn-checkout { background: var(--success); }
         .btn-checkin { background: var(--info); }
+        .btn-add { background: var(--dark); width: 100%; margin-top: 10px; }
         
         .btn:active { opacity: 0.8; transform: scale(0.95); }
 
@@ -105,6 +134,16 @@
         .badge-in { color: #065f46; font-weight: bold; }
         .badge-out { color: #92400e; font-weight: bold; }
         .time-badge { background: #eee; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px; /* Verhindert Auto-Zoom auf iPhone */
+        }
     </style>
 </head>
 <body>
@@ -124,15 +163,33 @@
 </header>
 
 <main id="main-content" style="display:none;">
+    
+    <h2>⚡ Sofort-Ankunft</h2>
+    <div class="quick-form">
+        <div class="btn-grid">
+            <button class="btn-small-opt" onclick="setQuick('Delta Trans')">Delta</button>
+            <button class="btn-small-opt" onclick="setQuick('Kampe')">Kampe</button>
+            <button class="btn-small-opt" onclick="setQuick('Rudolph')">Rudolph</button>
+            <button class="btn-small-opt" onclick="setQuick('PraPol')">PraPol</button>
+            <button class="btn-small-opt" onclick="setQuick('Mikus')">Mikus</button>
+            <button class="btn-small-opt" onclick="setQuick('')">Leeren</button>
+        </div>
+        <input type="text" id="mSpedition" placeholder="Spedition">
+        <input type="text" id="mPlate" placeholder="Kennzeichen (Optional)">
+        <select id="mType">
+            <option value="Anlieferung">Anlieferung (IN)</option>
+            <option value="Abholung">Abholung (OUT)</option>
+        </select>
+        <button class="btn btn-add" onclick="saveQuickTruck()">LKW Einchecken</button>
+    </div>
+
     <h2>🔴 Im Werk (Abmelden)</h2>
     <div id="ist-list"></div>
 
-    <hr style="border: 0; border-top: 1px solid #ccc; margin: 25px 0;">
-
-    <h2>🔵 Heute geplant (Einchecken)</h2>
+    <h2>🔵 Heute geplant</h2>
     <div id="plan-list"></div>
     
-    <button onclick="logout()" style="width:100%; margin-top:30px; padding:10px; background:#4a4a4a; color:white; border:none; border-radius:6px;">Abmelden</button>
+    <button onclick="logout()" style="width:100%; margin:40px 0 20px 0; padding:12px; background:#4a4a4a; color:white; border:none; border-radius:6px; font-weight:bold;">Abmelden</button>
 </main>
 
 <script>
@@ -150,6 +207,10 @@
     function logout() {
         sessionStorage.removeItem('mobileLoggedIn');
         location.reload();
+    }
+
+    function setQuick(val) {
+        document.getElementById('mSpedition').value = val;
     }
 
     window.onload = function() {
@@ -188,6 +249,31 @@
         const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderPlanList(plans);
     });
+
+    window.saveQuickTruck = async () => {
+        const sped = document.getElementById('mSpedition').value;
+        const plate = document.getElementById('mPlate').value || '?';
+        const type = document.getElementById('mType').value;
+
+        if(!sped) { alert("Bitte Spedition angeben!"); return; }
+
+        const now = new Date();
+        const curTime = now.toTimeString().substring(0,5);
+        
+        const entry = {
+            spedition: sped, plate: plate, ware: 'Mobile Erfassung',
+            type: type, date: now.toISOString().split('T')[0],
+            time: curTime, shift: calculateShift(curTime),
+            departureTime: null, duration: null
+        };
+
+        try {
+            await addDoc(collection(db, "logs"), entry);
+            document.getElementById('mSpedition').value = '';
+            document.getElementById('mPlate').value = '';
+            alert("LKW erfasst!");
+        } catch (e) { console.error(e); }
+    };
 
     function renderIstList(logs) {
         const todayStr = new Date().toISOString().split('T')[0];
