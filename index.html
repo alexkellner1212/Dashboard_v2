@@ -20,25 +20,6 @@
             padding: 10px;
         }
 
-        /* LOGIN OVERLAY */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #1a1a1a; z-index: 10000; display: flex; 
-            align-items: center; justify-content: center;
-        }
-        .login-box {
-            background: white; padding: 25px; border-radius: 12px; width: 85%; max-width: 300px; 
-            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .login-input {
-            width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; 
-            border-radius: 6px; box-sizing: border-box; font-size: 16px;
-        }
-        .login-btn {
-            width: 100%; padding: 12px; background: var(--hanomag-red); color: white; 
-            border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px;
-        }
-
         header {
             background: white;
             padding: 10px;
@@ -142,27 +123,17 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
-            font-size: 16px; /* Verhindert Auto-Zoom auf iPhone */
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
 
-<div id="login-overlay">
-    <div class="login-box">
-        <h2 style="margin-top:0; color:#333;">Mobil Login</h2>
-        <input type="text" id="login-user" value="Logistik" class="login-input" readonly>
-        <input type="password" id="login-pass" placeholder="Passwort" class="login-input" autofocus>
-        <button onclick="handleLogin()" class="login-btn">Anmelden</button>
-        <p id="login-error" style="color:red; font-size:12px; margin-top:10px; display:none;">Passwort falsch!</p>
-    </div>
-</div>
-
 <header>
     <h1>Logistik Terminal Mobil</h1>
 </header>
 
-<main id="main-content" style="display:none;">
+<main id="main-content">
     
     <h2>⚡ Sofort-Ankunft</h2>
     <div class="quick-form">
@@ -188,36 +159,11 @@
 
     <h2>🔵 Heute geplant</h2>
     <div id="plan-list"></div>
-    
-    <button onclick="logout()" style="width:100%; margin:40px 0 20px 0; padding:12px; background:#4a4a4a; color:white; border:none; border-radius:6px; font-weight:bold;">Abmelden</button>
 </main>
 
 <script>
-    function handleLogin() {
-        const pass = document.getElementById('login-pass').value;
-        if(pass === "2013!") {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            sessionStorage.setItem('mobileLoggedIn', 'true');
-        } else {
-            document.getElementById('login-error').style.display = 'block';
-        }
-    }
-
-    function logout() {
-        sessionStorage.removeItem('mobileLoggedIn');
-        location.reload();
-    }
-
     function setQuick(val) {
         document.getElementById('mSpedition').value = val;
-    }
-
-    window.onload = function() {
-        if(sessionStorage.getItem('mobileLoggedIn') === 'true') {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-        }
     }
 </script>
 
@@ -271,7 +217,6 @@
             await addDoc(collection(db, "logs"), entry);
             document.getElementById('mSpedition').value = '';
             document.getElementById('mPlate').value = '';
-            alert("LKW erfasst!");
         } catch (e) { console.error(e); }
     };
 
